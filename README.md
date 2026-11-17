@@ -14,7 +14,7 @@
 ## 🚀 빠른 시작
 1. 저장소를 클론합니다:
    ```bash
-   git clone https://github.com/<your-username>/ladder-game.git
+   git clone https://github.com/cryu0917-creator/ladder-game.git
    ```
 2. `index.html` 파일을 크롬이나 엣지 등 웹 브라우저로 엽니다.
 
