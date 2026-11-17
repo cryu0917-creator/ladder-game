@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>인터랙티브 사다리 타기 게임</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0b1120 0%, #111827 50%, #1e1b4b 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* 배경 장식 글로우 */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -150px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, rgba(99, 102, 241, 0.05) 50%, transparent 80%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 1;
+    }
+
+    header {
+      text-align: center;
+      padding: 8px 0;
+      position: relative;
+    }
+
+    header h1 {
+      font-size: 2.1rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: rgba(30, 41, 59, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.4), 0 0 1px 1px rgba(255, 255, 255, 0.05) inset;
+    }
+
+    /* 설정 섹션 */
+    .setup-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .controls-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .counter-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 4px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid #475569;
+      background: #1e293b;
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-circle:hover:not(:disabled) {
+      background: #38bdf8;
+      border-color: #38bdf8;
+      color: #0f172a;
+      transform: scale(1.08);
+    }
+
+    .btn-circle:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button.btn {
+      padding: 8px 16px;
+      border-radius: 10px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid #475569;
+    }
+
+    .btn-secondary:hover {
+      background: #334155;
+      color: #fff;
+      border-color: #64748b;
+    }
+
+    .btn-accent {
+      background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(217, 70, 239, 0.35);
+    }
+
+    .btn-accent:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(217, 70, 239, 0.5);
+    }
+
+    .btn-sound {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid #475569;
+      color: #38bdf8;
+    }
+
+    .btn-sound.muted {
+      color: #94a3b8;
+      border-color: #334155;
+    }
+
+    .btn-sound:hover {
+      background: #1e293b;
+      border-color: #38bdf8;
+    }
+
+    .inputs-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .inputs-wrapper {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-col-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .grid-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .grid-inputs::-webkit-scrollbar {
+      width: 6px;
+    }
+    .grid-inputs::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.1);
+      border-radius: 4px;
+    }
+    .grid-inputs::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 4px;
+    }
+
+    .input-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .item-idx {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: #1e293b;
+      color: #94a3b8;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 1px solid #334155;
+    }
+
+    .input-item input {
+      flex: 1;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 6px 12px;
+      color: #f1f5f9;
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .input-item input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+
+    /* 게임 캔버스 영역 */
+    .game-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .names-row {
+      display: flex;
+      width: 100%;
+      justify-content: space-around;
+      padding: 6px 0;
+      z-index: 2;
+    }
+
+    .name-badge {
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      text-align: center;
+      min-width: 68px;
+      max-width: 110px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      border: 1.5px solid transparent;
+      position: relative;
+    }
+
+    .name-top {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-color: #334155;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    .name-top:hover {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 14px rgba(56, 189, 248, 0.35);
+    }
+
+    .name-top.active {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 0 18px #38bdf8, 0 0 35px rgba(56, 189, 248, 0.4);
+    }
+
+    .name-bottom {
+      background: #1e293b;
+      color: #f43f5e;
+      border-color: rgba(244, 63, 94, 0.4);
+      cursor: default;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 도착 시 팡파레 축하 강조 */
+    .name-bottom.celebrate {
+      animation: celebrateBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      background: linear-gradient(135deg, #e11d48 0%, #f43f5e 100%) !important;
+      color: #ffffff !important;
+      border-color: #fda4af !important;
+      box-shadow: 0 0 25px rgba(244, 63, 94, 0.9), 0 0 45px rgba(244, 63, 94, 0.4) !important;
+      z-index: 10;
+    }
+
+    @keyframes celebrateBounce {
+      0% { transform: scale(1); }
+      30% { transform: scale(1.28) translateY(-6px); }
+      60% { transform: scale(1.15) translateY(-2px); }
+      100% { transform: scale(1.2) translateY(-4px); }
+    }
+
+    .canvas-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      position: relative;
+      margin: 6px 0;
+    }
+
+    canvas#ladderCanvas {
+      display: block;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.5);
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
+    }
+
+    /* 폭죽 캔버스 */
+    canvas#confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* 결과 표시 테이블 / 카드 */
+    .results-wrapper {
+      margin-top: 14px;
+      display: none;
+    }
+
+    .results-wrapper.active {
+      display: block;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .result-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      position: relative;
+      overflow: hidden;
+      animation: cardPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .result-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--card-accent, #38bdf8);
+      box-shadow: 0 0 10px var(--card-accent, #38bdf8);
+    }
+
+    .result-card .participant {
+      font-weight: 700;
+      color: #f1f5f9;
+      font-size: 0.95rem;
+    }
+
+    .result-card .arrow {
+      color: #64748b;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .result-card .outcome {
+      font-weight: 800;
+      color: var(--card-accent, #38bdf8);
+      font-size: 0.95rem;
+    }
+
+    @keyframes cardPopIn {
+      0% { opacity: 0; transform: translateY(12px) scale(0.94); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 안내 메시지 */
+    .instruction-bar {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .instruction-bar span {
+      color: #38bdf8;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 폭죽 캔버스 (전체화면 오버레이) -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <div class="container">
+    <header>
+      <h1>🎲 사다리 타기 게임</h1>
+      <p>참가자와 결과를 입력하고 이름을 클릭해 결과를 확인하세요!</p>
+    </header>
+
+    <!-- 사다리 설정 컨트롤 -->
+    <section class="card setup-section">
+      <div class="controls-top">
+        <div class="counter-group">
+          <span>인원수:</span>
+          <button id="btnDec" class="btn-circle" title="인원 감소">-</button>
+          <span id="playerCountLabel" style="min-width: 22px; text-align: center; font-size: 1.15rem; font-weight: 800; color: #38bdf8;">4</span>
+          <button id="btnInc" class="btn-circle" title="인원 증가">+</button>
+        </div>
+
+        <div class="btn-group">
+          <button id="btnSoundToggle" class="btn btn-sound" title="효과음 켜기/끄기">
+            <span id="soundIcon">🔊</span>
+            <span id="soundLabel">사운드 ON</span>
+          </button>
+          <button id="btnShufflePresets" class="btn btn-secondary">⚡ 예시 결과 채우기</button>
+          <button id="btnRegenerate" class="btn btn-primary">🔀 사다리 다시 그리기</button>
+          <button id="btnShowAll" class="btn btn-accent">🎯 전체 결과 한눈에 보기</button>
+        </div>
+      </div>
+
+      <div class="inputs-wrapper">
+        <div>
+          <div class="input-col-title">👤 참가자 이름</div>
+          <div id="playersInputList" class="grid-inputs"></div>
+        </div>
+        <div>
+          <div class="input-col-title">🎁 결과 항목</div>
+          <div id="resultsInputList" class="grid-inputs"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 사다리 캔버스 영역 -->
+    <section class="card game-area">
+      <div class="instruction-bar">
+        💡 위쪽 <span>이름표를 클릭</span>하면 화려한 효과음과 함께 사다리를 타고 내려갑니다!
+      </div>
+
+      <!-- 상단 이름표 -->
+      <div id="topLabels" class="names-row"></div>
+
+      <!-- 사다리 캔버스 -->
+      <div class="canvas-container">
+        <canvas id="ladderCanvas"></canvas>
+      </div>
+
+      <!-- 하단 결과표 -->
+      <div id="bottomLabels" class="names-row"></div>
+
+      <!-- 전체 매핑 결과 영역 -->
+      <div id="resultsWrapper" class="results-wrapper" style="width: 100%;">
+        <div class="input-col-title" style="margin-top: 16px;">📋 최종 매칭 결과표</div>
+        <div id="resultsGrid" class="results-grid"></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. Web Audio API 신디사이저 모듈
+    // ==========================================
+    const SoundFX = {
+      ctx: null,
+      enabled: true,
+
+      init() {
+        if (!this.ctx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            this.ctx = new AudioContextClass();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+
+      toggle() {
+        this.enabled = !this.enabled;
+        if (this.enabled) this.init();
+        return this.enabled;
+      },
+
+      // 사다리 이동 중 가벼운 틱 소리
+      playTick() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(420, now);
+          osc.frequency.exponentialRampToValueAtTime(160, now + 0.035);
+
+          gain.gain.setValueAtTime(0.04, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.035);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.04);
+        } catch (e) {
+          console.warn('Audio error:', e);
+        }
+      },
+
+      // 사다리 꺾일 때 퐁/띠링 소리 (경쾌한 신스 톤)
+      playTurn() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(659.25, now); // E5
+          osc.frequency.exponentialRampToValueAtTime(880.0, now + 0.09); // A5
+
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.1);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.11);
+        } catch (e) {
+          console.warn('Audio error:', e);
+        }
+      },
+
+      // 최종 도착 시 축하 팡파레 화음 (C-E-G-C 메이저 아르페지오 및 풍성한 울림)
+      playFanfare() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        try {
+          const notes = [
+            { f: 523.25, d: 0.00, dur: 0.18, type: 'triangle' }, // C5
+            { f: 659.25, d: 0.10, dur: 0.18, type: 'triangle' }, // E5
+            { f: 783.99, d: 0.20, dur: 0.22, type: 'triangle' }, // G5
+            { f: 1046.50, d: 0.32, dur: 0.70, type: 'sine' },     // C6 (메인)
+            { f: 1318.51, d: 0.34, dur: 0.65, type: 'triangle' } // E6 (화음)
+          ];
+
+          notes.forEach(n => {
+            const now = this.ctx.currentTime + n.d;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = n.type;
+            osc.frequency.setValueAtTime(n.f, now);
+
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + n.dur);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start(now);
+            osc.stop(now + n.dur + 0.05);
+          });
+        } catch (e) {
+          console.warn('Audio error:', e);
+        }
+      }
+    };
+
+    // ==========================================
+    // 2. 자체 고성능 Confetti (폭죽 파티클) 시스템
+    // ==========================================
+    const Confetti = {
+      canvas: document.getElementById('confettiCanvas'),
+      ctx: null,
+      particles: [],
+      animId: null,
+
+      init() {
+        this.ctx = this.canvas.getContext('2d');
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+      },
+
+      resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+      },
+
+      fire(x, y, count = 60) {
+        const colors = [
+          '#38bdf8', '#f43f5e', '#a855f7', '#fbbf24', '#34d399',
+          '#f97316', '#e879f9', '#22d3ee', '#facc15', '#ffffff'
+        ];
+
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 9 + 4;
+          this.particles.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 5, // 위로 솟구치도록 바이어스
+            size: Math.random() * 8 + 5,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: Math.random() * 360,
+            rotSpeed: (Math.random() - 0.5) * 12,
+            gravity: 0.22,
+            drag: 0.96,
+            opacity: 1,
+            shape: Math.random() > 0.4 ? 'rect' : 'circle'
+          });
+        }
+
+        if (!this.animId) {
+          this.loop();
+        }
+      },
+
+      // 화면 전체 축하 폭죽 (왼쪽, 가운데, 오른쪽 순차 발사)
+      fireAll() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        this.fire(w * 0.5, h * 0.45, 90);
+        setTimeout(() => this.fire(w * 0.25, h * 0.5, 70), 180);
+        setTimeout(() => this.fire(w * 0.75, h * 0.5, 70), 360);
+      },
+
+      loop() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+          const p = this.particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+          p.vx *= p.drag;
+          p.vy *= p.drag;
+          p.rotation += p.rotSpeed;
+          p.opacity -= 0.012;
+
+          if (p.opacity <= 0 || p.y > this.canvas.height + 20) {
+            this.particles.splice(i, 1);
+            continue;
+          }
+
+          this.ctx.save();
+          this.ctx.globalAlpha = Math.max(0, p.opacity);
+          this.ctx.translate(p.x, p.y);
+          this.ctx.rotate((p.rotation * Math.PI) / 180);
+          this.ctx.fillStyle = p.color;
+
+          if (p.shape === 'rect') {
+            this.ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+          } else {
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, p.size / 2.5, 0, Math.PI * 2);
+            this.ctx.fill();
+          }
+          this.ctx.restore();
+        }
+
+        if (this.particles.length > 0) {
+          this.animId = requestAnimationFrame(() => this.loop());
+        } else {
+          this.animId = null;
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+      }
+    };
+
+    // ==========================================
+    // 3. 상태 관리 및 테마 색상 팔레트
+    // ==========================================
+    let count = 4;
+    const MIN_PLAYERS = 2;
+    const MAX_PLAYERS = 10;
+
+    let players = ['라이언', '어피치', '무지', '콘'];
+    let results = ['당첨 1등', '꽝', '커피 쏘기', '점심 쏘기'];
+
+    const themeColors = [
+      '#38bdf8', // 하늘색 (Sky)
+      '#f43f5e', // 로즈 (Rose)
+      '#a855f7', // 퍼플 (Purple)
+      '#fbbf24', // 앰버 (Amber)
+      '#34d399', // 에메랄드 (Emerald)
+      '#f97316', // 오렌지 (Orange)
+      '#e879f9', // 푸시아 (Fuchsia)
+      '#22d3ee', // 시안 (Cyan)
+      '#a3e635', // 라임 (Lime)
+      '#f472b6'  // 핑크 (Pink)
+    ];
+
+    const presetOutcomes = [
+      ['커피 쏘기', '당첨 1등', '꽝', '디저트 쏘기', '편의점 쏘기', '벌칙 수행', '면제권', '간식 사기', '심부름', '설거지'],
+      ['1등', '2등', '3등', '4등', '5등', '6등', '7등', '8등', '9등', '10등'],
+      ['만원 내기', '오천원 내기', '면제', '면제', '커피 1잔', '식사권', '청소하기', '노래 부르기', '꽝', '행운의 주인공']
+    ];
+
+    let horizontalRungs = [];
+    let pathHistory = {};
+
+    const canvas = document.getElementById('ladderCanvas');
+    const ctx = canvas.getContext('2d');
+    let canvasWidth = 720;
+    const canvasHeight = 420;
+
+    let animActive = false;
+    let animCancelId = null;
+
+    // ==========================================
+    // 4. 초기화 & UI 세팅
+    // ==========================================
+    function init() {
+      Confetti.init();
+      setupUI();
+      generateLadderData();
+      renderAll();
+
+      window.addEventListener('resize', handleResize);
+    }
+
+    function handleResize() {
+      calculateDimensions();
+      drawLadder();
+    }
+
+    function calculateDimensions() {
+      const containerWidth = canvas.parentElement.clientWidth;
+      canvasWidth = Math.min(containerWidth, Math.max(340, count * 95));
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+    }
+
+    function setupUI() {
+      renderInputs();
+
+      // 인원수 감소
+      document.getElementById('btnDec').onclick = () => {
+        SoundFX.init();
+        if (count > MIN_PLAYERS) {
+          count--;
+          players.length = count;
+          results.length = count;
+          updateStateAndRedraw();
+        }
+      };
+
+      // 인원수 증가
+      document.getElementById('btnInc').onclick = () => {
+        SoundFX.init();
+        if (count < MAX_PLAYERS) {
+          count++;
+          if (!players[count - 1]) players.push(`참가자 ${count}`);
+          if (!results[count - 1]) results.push(`결과 ${count}`);
+          updateStateAndRedraw();
+        }
+      };
+
+      // 사다리 재생성
+      document.getElementById('btnRegenerate').onclick = () => {
+        SoundFX.init();
+        generateLadderData();
+        clearAnimations();
+        renderAll();
+      };
+
+      // 예시 결과 자동채우기
+      document.getElementById('btnShufflePresets').onclick = () => {
+        SoundFX.init();
+        const randomSet = presetOutcomes[Math.floor(Math.random() * presetOutcomes.length)];
+        const shuffled = [...randomSet].sort(() => 0.5 - Math.random());
+        for (let i = 0; i < count; i++) {
+          results[i] = shuffled[i % shuffled.length];
+        }
+        renderInputs();
+        updateBottomLabels();
+        clearAnimations();
+        drawLadder();
+      };
+
+      // 전체 결과 보기
+      document.getElementById('btnShowAll').onclick = () => {
+        SoundFX.init();
+        showAllPaths();
+      };
+
+      // 사운드 ON/OFF 토글
+      const btnSound = document.getElementById('btnSoundToggle');
+      btnSound.onclick = () => {
+        const isEnabled = SoundFX.toggle();
+        const icon = document.getElementById('soundIcon');
+        const label = document.getElementById('soundLabel');
+        if (isEnabled) {
+          icon.textContent = '🔊';
+          label.textContent = '사운드 ON';
+          btnSound.classList.remove('muted');
+          SoundFX.playTurn();
+        } else {
+          icon.textContent = '🔇';
+          label.textContent = '사운드 OFF';
+          btnSound.classList.add('muted');
+        }
+      };
+    }
+
+    function updateStateAndRedraw() {
+      document.getElementById('playerCountLabel').textContent = count;
+      document.getElementById('btnDec').disabled = count <= MIN_PLAYERS;
+      document.getElementById('btnInc').disabled = count >= MAX_PLAYERS;
+      renderInputs();
+      generateLadderData();
+      clearAnimations();
+      renderAll();
+    }
+
+    function renderInputs() {
+      const pList = document.getElementById('playersInputList');
+      const rList = document.getElementById('resultsInputList');
+      pList.innerHTML = '';
+      rList.innerHTML = '';
+
+      for (let i = 0; i < count; i++) {
+        if (!players[i]) players[i] = `참가자 ${i + 1}`;
+        if (!results[i]) results[i] = `결과 ${i + 1}`;
+
+        const pItem = document.createElement('div');
+        pItem.className = 'input-item';
+        pItem.innerHTML = `
+          <div class="item-idx" style="color: ${themeColors[i % themeColors.length]}; border-color: ${themeColors[i % themeColors.length]}66;">${i + 1}</div>
+          <input type="text" value="${escapeHtml(players[i])}" data-idx="${i}" />
+        `;
+        const pInput = pItem.querySelector('input');
+        pInput.oninput = (e) => {
+          players[i] = e.target.value.trim() || `참가자 ${i + 1}`;
+          updateTopLabels();
+        };
+        pList.appendChild(pItem);
+
+        const rItem = document.createElement('div');
+        rItem.className = 'input-item';
+        rItem.innerHTML = `
+          <div class="item-idx">${i + 1}</div>
+          <input type="text" value="${escapeHtml(results[i])}" data-idx="${i}" />
+        `;
+        const rInput = rItem.querySelector('input');
+        rInput.oninput = (e) => {
+          results[i] = e.target.value.trim() || `결과 ${i + 1}`;
+          updateBottomLabels();
+        };
+        rList.appendChild(rItem);
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // ==========================================
+    // 5. 사다리 데이터 생성 및 경로 계산
+    // ==========================================
+    function generateLadderData() {
+      horizontalRungs = [];
+      const steps = 14;
+      const stepY = (canvasHeight - 60) / steps;
+      const startY = 30;
+
+      for (let s = 1; s < steps; s++) {
+        const y = startY + s * stepY + (Math.random() * 6 - 3);
+        let col = 0;
+        while (col < count - 1) {
+          if (Math.random() < 0.52) {
+            horizontalRungs.push({
+              colA: col,
+              colB: col + 1,
+              y: y
+            });
+            col += 2; // 바로 옆 연속 연결 방지
+          } else {
+            col += 1;
+          }
+        }
+      }
+
+      calculateAllPaths();
+    }
+
+    function getColumnX(colIndex) {
+      const padding = 42;
+      const step = (canvasWidth - padding * 2) / (count - 1);
+      return padding + colIndex * step;
+    }
+
+    function calculateAllPaths() {
+      pathHistory = {};
+      const sortedRungs = [...horizontalRungs].sort((a, b) => a.y - b.y);
+
+      for (let startCol = 0; startCol < count; startCol++) {
+        let currentCol = startCol;
+        let currentY = 0;
+        const points = [{ x: getColumnX(currentCol), y: 0 }];
+
+        for (const rung of sortedRungs) {
+          if (rung.y <= currentY) continue;
+
+          if (rung.colA === currentCol) {
+            points.push({ x: getColumnX(currentCol), y: rung.y });
+            points.push({ x: getColumnX(rung.colB), y: rung.y });
+            currentCol = rung.colB;
+            currentY = rung.y;
+          } else if (rung.colB === currentCol) {
+            points.push({ x: getColumnX(currentCol), y: rung.y });
+            points.push({ x: getColumnX(rung.colA), y: rung.y });
+            currentCol = rung.colA;
+            currentY = rung.y;
+          }
+        }
+
+        points.push({ x: getColumnX(currentCol), y: canvasHeight });
+        pathHistory[startCol] = {
+          finalCol: currentCol,
+          points: points
+        };
+      }
+    }
+
+    function renderAll() {
+      calculateDimensions();
+      updateTopLabels();
+      updateBottomLabels();
+      drawLadder();
+      document.getElementById('resultsWrapper').classList.remove('active');
+    }
+
+    function updateTopLabels() {
+      const container = document.getElementById('topLabels');
+      container.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const color = themeColors[i % themeColors.length];
+        const badge = document.createElement('div');
+        badge.className = 'name-badge name-top';
+        badge.id = `top-badge-${i}`;
+        badge.textContent = players[i];
+        badge.title = `${players[i]}의 사다리 타기`;
+        badge.style.borderColor = `${color}66`;
+        badge.onclick = () => {
+          SoundFX.init();
+          runSingleAnimation(i);
+        };
+        container.appendChild(badge);
+      }
+    }
+
+    function updateBottomLabels() {
+      const container = document.getElementById('bottomLabels');
+      container.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const badge = document.createElement('div');
+        badge.className = 'name-badge name-bottom';
+        badge.id = `bottom-badge-${i}`;
+        badge.textContent = results[i];
+        container.appendChild(badge);
+      }
+    }
+
+    // ==========================================
+    // 6. 캔버스 렌더링 (강화된 네온 Glow & 핀)
+    // ==========================================
+    function drawLadder(activePaths = []) {
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      // 1. 기본 세로선 (그리드 배경)
+      ctx.lineWidth = 3.5;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#334155';
+
+      for (let i = 0; i < count; i++) {
+        const x = getColumnX(i);
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvasHeight);
+        ctx.stroke();
+      }
+
+      // 2. 기본 가로선
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = '#475569';
+
+      for (const rung of horizontalRungs) {
+        const x1 = getColumnX(rung.colA);
+        const x2 = getColumnX(rung.colB);
+        ctx.beginPath();
+        ctx.moveTo(x1, rung.y);
+        ctx.lineTo(x2, rung.y);
+        ctx.stroke();
+      }
+
+      // 3. 활성화된 경로 그리기 (글로우 + 하이라이트)
+      activePaths.forEach(({ path, colorIdx, progress }) => {
+        const strokeColor = themeColors[colorIdx % themeColors.length];
+        drawPathWithGlow(path, strokeColor, progress);
+      });
+    }
+
+    function drawPathWithGlow(points, color, progress = 1) {
+      if (points.length < 2) return;
+
+      // 전체 경로 길이 계산
+      let totalLength = 0;
+      const segLengths = [];
+      for (let i = 0; i < points.length - 1; i++) {
+        const dx = points[i+1].x - points[i].x;
+        const dy = points[i+1].y - points[i].y;
+        const len = Math.hypot(dx, dy);
+        segLengths.push(len);
+        totalLength += len;
+      }
+
+      const targetLen = totalLength * progress;
+      let drawnLen = 0;
+
+      // 끝점 계산용
+      let currentEnd = { x: points[0].x, y: points[0].y };
+
+      // [1단계] 외부 소프트 네온 글로우 패스
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 10;
+      ctx.strokeStyle = color;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 18;
+      ctx.globalAlpha = 0.55;
+
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+
+      for (let i = 0; i < segLengths.length; i++) {
+        const segLen = segLengths[i];
+        if (drawnLen + segLen <= targetLen) {
+          ctx.lineTo(points[i+1].x, points[i+1].y);
+          drawnLen += segLen;
+          currentEnd = { x: points[i+1].x, y: points[i+1].y };
+        } else {
+          const remain = targetLen - drawnLen;
+          const ratio = segLen > 0 ? remain / segLen : 0;
+          currentEnd.x = points[i].x + (points[i+1].x - points[i].x) * ratio;
+          currentEnd.y = points[i].y + (points[i+1].y - points[i].y) * ratio;
+          ctx.lineTo(currentEnd.x, currentEnd.y);
+          break;
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // [2단계] 선명한 내부 코어 라인
+      drawnLen = 0;
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = '#ffffff';
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 8;
+
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+
+      for (let i = 0; i < segLengths.length; i++) {
+        const segLen = segLengths[i];
+        if (drawnLen + segLen <= targetLen) {
+          ctx.lineTo(points[i+1].x, points[i+1].y);
+          drawnLen += segLen;
+        } else {
+          ctx.lineTo(currentEnd.x, currentEnd.y);
+          break;
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // [3단계] 이동 중인 핀(Pin) / 구체 효과
+      if (progress < 1) {
+        ctx.save();
+        // 핀 외부 후광 펄스 링
+        ctx.beginPath();
+        ctx.arc(currentEnd.x, currentEnd.y, 11, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.4;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 16;
+        ctx.fill();
+
+        // 핀 내부 메인 구체
+        ctx.beginPath();
+        ctx.arc(currentEnd.x, currentEnd.y, 6.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.globalAlpha = 1.0;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function clearAnimations() {
+      if (animCancelId) {
+        cancelAnimationFrame(animCancelId);
+        animCancelId = null;
+      }
+      animActive = false;
+      document.querySelectorAll('.name-top').forEach(el => {
+        el.classList.remove('active');
+        el.style.backgroundColor = '';
+        el.style.boxShadow = '';
+      });
+      document.querySelectorAll('.name-bottom').forEach(el => {
+        el.classList.remove('celebrate');
+      });
+    }
+
+    // ==========================================
+    // 7. 애니메이션 컨트롤 & 사운드 / 폭죽 연동
+    // ==========================================
+    function runSingleAnimation(startCol) {
+      if (animActive) clearAnimations();
+      animActive = true;
+
+      const badgeColor = themeColors[startCol % themeColors.length];
+
+      // 상단 뱃지 활성화
+      document.querySelectorAll('.name-top').forEach(el => el.classList.remove('active'));
+      const activeBadge = document.getElementById(`top-badge-${startCol}`);
+      if (activeBadge) {
+        activeBadge.classList.add('active');
+        activeBadge.style.backgroundColor = badgeColor;
+        activeBadge.style.boxShadow = `0 0 20px ${badgeColor}, 0 0 35px ${badgeColor}66`;
+      }
+
+      const pathData = pathHistory[startCol];
+      const points = pathData.points;
+      const startTime = performance.now();
+      const duration = 1600; // 1.6초
+
+      // 세그먼트별 누적 거리 계산 (꺾임 포인트 감지용)
+      let totalLength = 0;
+      const segCumulative = [0];
+      for (let i = 0; i < points.length - 1; i++) {
+        const dx = points[i+1].x - points[i].x;
+        const dy = points[i+1].y - points[i].y;
+        totalLength += Math.hypot(dx, dy);
+        segCumulative.push(totalLength);
+      }
+
+      let lastPassedSegIdx = 0;
+      let lastTickTime = 0;
+
+      function step(now) {
+        const elapsed = now - startTime;
+        const rawProgress = Math.min(1, elapsed / duration);
+        const progress = easeInOutQuad(rawProgress);
+
+        const currentDist = totalLength * progress;
+
+        // 세그먼트 전환(꺾임) 감지 -> playTurn 사운드
+        for (let i = lastPassedSegIdx + 1; i < segCumulative.length; i++) {
+          if (currentDist >= segCumulative[i]) {
+            lastPassedSegIdx = i;
+            // 수평 이동 분기점일 때 꺾임 효과음 재생
+            if (i < points.length && points[i].x !== points[i-1].x) {
+              SoundFX.playTurn();
+            }
+          }
+        }
+
+        // 이동 중 일정한 시간 간격(약 70ms)으로 틱틱 소리 재생
+        if (now - lastTickTime > 70 && rawProgress < 0.96) {
+          SoundFX.playTick();
+          lastTickTime = now;
+        }
+
+        drawLadder([
+          { path: pathData.points, colorIdx: startCol, progress: progress }
+        ]);
+
+        if (rawProgress < 1) {
+          animCancelId = requestAnimationFrame(step);
+        } else {
+          animActive = false;
+
+          // 도착 완료 시 처리
+          SoundFX.playFanfare();
+
+          const targetBottom = document.getElementById(`bottom-badge-${pathData.finalCol}`);
+          if (targetBottom) {
+            targetBottom.classList.add('celebrate');
+
+            // 폭죽 효과: 타겟 뱃지의 화면상 절대 좌표 추출 후 발사
+            const rect = targetBottom.getBoundingClientRect();
+            const posX = rect.left + rect.width / 2;
+            const posY = rect.top + rect.height / 2;
+            Confetti.fire(posX, posY, 55);
+
+            setTimeout(() => {
+              targetBottom.classList.remove('celebrate');
+            }, 1400);
+          }
+        }
+      }
+
+      animCancelId = requestAnimationFrame(step);
+    }
+
+    // 전체 결과 한눈에 보기
+    function showAllPaths() {
+      clearAnimations();
+
+      const allActive = [];
+      for (let i = 0; i < count; i++) {
+        allActive.push({
+          path: pathHistory[i].points,
+          colorIdx: i,
+          progress: 1
+        });
+      }
+
+      drawLadder(allActive);
+
+      // 팡파레 & 화면 전체 폭죽 축하 효과
+      SoundFX.playFanfare();
+      Confetti.fireAll();
+
+      // 하단 결과 카드 채우기
+      const wrapper = document.getElementById('resultsWrapper');
+      const grid = document.getElementById('resultsGrid');
+      grid.innerHTML = '';
+
+      for (let i = 0; i < count; i++) {
+        const finalCol = pathHistory[i].finalCol;
+        const color = themeColors[i % themeColors.length];
+        const card = document.createElement('div');
+        card.className = 'result-card';
+        card.style.setProperty('--card-accent', color);
+        card.style.animationDelay = `${i * 0.08}s`;
+        card.innerHTML = `
+          <span class="participant" style="color: ${color};">${escapeHtml(players[i])}</span>
+          <span class="arrow">➔</span>
+          <span class="outcome">${escapeHtml(results[finalCol])}</span>
+        `;
+        grid.appendChild(card);
+      }
+
+      wrapper.classList.add('active');
+      wrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function easeInOutQuad(t) {
+      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+
+    // 시작
+    window.onload = init;
+  </script>
+</body>
+</html>
